@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  RIDER
+  DRIVER
+  ADMIN
+}
+
+enum OnlineStatus {
+  ONLINE
+  OFFLINE
+}
+
+enum RideStatus {
+  REQUESTED
+  ACCEPTED
+  STARTED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  UPI
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model User {
+  id            String   @id @default(uuid())
+  full_name     String
+  email         String   @unique
+  phone         String   @unique
+  password_hash String
+  role          Role     @default(RIDER)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  driver        Driver?
+  rides_as_rider Ride[]  @relation("RiderRides")
+
+  @@index([email])
+  @@index([phone])
+}
+
+model Driver {
+  id              String       @id @default(uuid())
+  user_id         String       @unique
+  license_number  String       @unique
+  online_status   OnlineStatus @default(OFFLINE)
+  average_rating  Float        @default(0.0)
+  total_rides     Int          @default(0)
+  created_at      DateTime     @default(now())
+  updated_at      DateTime     @updatedAt
+
+  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  vehicles        Vehicle[]
+  rides_as_driver Ride[]       @relation("DriverRides")
+
+  @@index([online_status])
+}
+
+model Vehicle {
+  id                  String   @id @default(uuid())
+  driver_id           String
+  brand               String
+  model               String
+  registration_number String   @unique
+  vehicle_type        String
+  color               String
+  created_at          DateTime @default(now())
+
+  driver              Driver   @relation(fields: [driver_id], references: [id], onDelete: Cascade)
+
+  @@index([registration_number])
+}
+
+model Location {
+  id        String   @id @default(uuid())
+  latitude  Float
+  longitude Float
+  address   String
+
+  pickups      Ride[] @relation("PickupLocation")
+  destinations Ride[] @relation("DestinationLocation")
+}
+
+model Ride {
+  id                      String     @id @default(uuid())
+  rider_id                String
+  driver_id               String?
+  pickup_location_id      String
+  destination_location_id String
+  estimated_distance      Float
+  estimated_fare          Float
+  final_fare              Float?
+  status                  RideStatus @default(REQUESTED)
+  created_at              DateTime   @default(now())
+  completed_at            DateTime?
+  updated_at              DateTime   @updatedAt
+
+  rider                User             @relation("RiderRides", fields: [rider_id], references: [id])
+  driver               Driver?          @relation("DriverRides", fields: [driver_id], references: [id])
+  pickup_location      Location         @relation("PickupLocation", fields: [pickup_location_id], references: [id])
+  destination_location Location         @relation("DestinationLocation", fields: [destination_location_id], references: [id])
+  payment              Payment?
+  rating               Rating?
+  status_history       RideStatusHistory[]
+
+  @@index([rider_id])
+  @@index([driver_id])
+  @@index([status])
+  @@index([created_at])
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  ride_id        String        @unique
+  amount         Float
+  payment_method PaymentMethod
+  payment_status PaymentStatus @default(PENDING)
+  created_at     DateTime      @default(now())
+  updated_at     DateTime      @updatedAt
+
+  ride           Ride          @relation(fields: [ride_id], references: [id], onDelete: Cascade)
+}
+
+model Rating {
+  id           String   @id @default(uuid())
+  ride_id      String   @unique
+  rider_rating Float
+  review       String?
+  created_at   DateTime @default(now())
+
+  ride         Ride     @relation(fields: [ride_id], references: [id], onDelete: Cascade)
+}
+
+model RideStatusHistory {
+  id              String     @id @default(uuid())
+  ride_id         String
+  previous_status RideStatus?
+  new_status      RideStatus
+  timestamp       DateTime   @default(now())
+
+  ride            Ride       @relation(fields: [ride_id], references: [id], onDelete: Cascade)
+
+  @@index([ride_id])
+}
