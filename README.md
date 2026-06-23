@@ -2,6 +2,14 @@
 
 RideFlow is a comprehensive Database Management System (DBMS) project that models the core functionality of a ride-sharing application like Uber. It demonstrates advanced SQL concepts, robust schema design, backend API development, and a live frontend designed specifically to showcase database operations.
 
+## 📸 Screenshots
+
+*(Demonstration of the Live SQL Viewer and Dashboard)*
+![Dashboard Overview](docs/dashboard.png)
+
+*(Demonstration of the Book Ride Modal and dynamic dropdowns)*
+![Booking Form](docs/booking_modal.png)
+
 ## 🚀 Features
 
 ### Database & Backend
