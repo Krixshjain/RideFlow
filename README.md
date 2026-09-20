@@ -29,16 +29,6 @@ All analytics in RideFlow are computed directly on the database engine via custo
 
 ---
 
-## 📸 Screenshots
-
-*(Demonstration of the Live SQL Viewer and Dashboard)*
-![Dashboard Overview](docs/dashboard.png)
-
-*(Demonstration of the Book Ride Modal and dynamic dropdowns)*
-![Booking Form](docs/booking_modal.png)
-
----
-
 ## 🚀 Features
 
 ### Database & Backend
